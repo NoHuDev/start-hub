@@ -1,0 +1,5 @@
+# Ensure Windows batch files always have CRLF line endings on checkout
+*.bat text eol=crlf
+
+# Ensure Unix shell scripts always have LF line endings on checkout
+*.sh text eol=lf
