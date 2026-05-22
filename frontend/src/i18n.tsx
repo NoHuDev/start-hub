@@ -1,0 +1,757 @@
+import React, { createContext, useContext, useState } from 'react';
+
+export type LanguageCode = 'en' | 'de' | 'es' | 'fr';
+
+export interface Language {
+  code: LanguageCode;
+  name: string;
+}
+
+export const SUPPORTED_LANGUAGES: Language[] = [
+  { code: 'en', name: 'English' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'es', name: 'Español' },
+  { code: 'fr', name: 'Français' }
+];
+
+type Translations = Record<string, string>;
+
+const translations: Record<LanguageCode, Translations> = {
+  en: {
+    // Top Header
+    searchPlaceholder: 'Search projects, paths...',
+    layoutEditActive: 'Layout editing active: Drag headers to move, drag bottom-right corner to resize.',
+    layoutSave: 'Save Layout',
+    layoutAdjust: 'Adjust Layout',
+    newTile: 'New Tile',
+    globalSettings: 'Global Settings',
+    noResultsTitle: 'No results found',
+    noResultsText: 'No tiles, projects, or links were found matching "{query}".',
+    
+    // Project Card
+    dragToReorder: 'Drag to reorder',
+    openIn: 'Open in {name}',
+    openFolder: 'Open Folder in File Manager',
+    start: 'Start',
+    disabled: 'Disabled',
+    runCommand: 'Run: {command} ({mode})',
+    backendLogsBtn: 'Backend Logs',
+    
+    // Badge Modes
+    mode_terminal: 'Terminal',
+    mode_terminal_sudo: 'Sudo Terminal',
+    mode_direct: 'Direct UI',
+    mode_browser: 'Browser',
+    mode_disabled: 'Disabled',
+
+    // Settings Modal
+    settingsTitle: 'Global Settings',
+    defaultTerminal: 'Default Terminal for Executions',
+    terminalHelp_alacritty: 'Alacritty is used to open interactive terminals.',
+    terminalHelp_konsole: 'Konsole is used to open interactive terminals.',
+    terminalHelp_cmd: 'Command Prompt (CMD) is used to open interactive terminals.',
+    terminalHelp_powershell: 'PowerShell is used to open interactive terminals.',
+    terminalHelp_gnome_terminal: 'GNOME Terminal is used to open interactive terminals.',
+    terminalHelp_xfce_terminal: 'XFCE Terminal is used to open interactive terminals.',
+    terminalHelp_kitty: 'Kitty is used to open interactive terminals.',
+    terminalHelp_terminator: 'Terminator is used to open interactive terminals.',
+    terminalHelp_tilix: 'Tilix is used to open interactive terminals.',
+    terminalHelp_mate_terminal: 'MATE Terminal is used to open interactive terminals.',
+    terminalHelp_xterm: 'XTerm is used to open interactive terminals.',
+    manageIdes: 'Manage IDE Configurations',
+    addIde: 'Add IDE',
+    noIdes: 'No IDE configurations defined.',
+    ideNamePlaceholder: 'IDE Name (e.g. VS Code)',
+    idePathPlaceholder: 'Path / Command (e.g. code)',
+    removeIde: 'Remove IDE',
+    customIconPlaceholder: 'Custom Icon Image (Optional absolute path to .png / .jpg)',
+    languageLabel: 'System Language',
+    languageHelp: 'Choose the interface language.',
+    cancel: 'Cancel',
+    save: 'Save',
+    
+    // Group Modal
+    editTile: 'Edit Tile',
+    createTile: 'Create New Tile',
+    tileNameLabel: 'Tile Name (Header)',
+    tileNamePlaceholder: 'e.g. Web Projects, System Tools, Server Status...',
+    tileTypeLabel: 'Type of Tile',
+    tileTypeGroup: 'Project Group (Default)',
+    tileTypeLinks: 'Bookmarks & Links',
+    tileTypeMonitoring: 'System Monitoring (Real-time)',
+    monitoringConfigTitle: 'System Monitoring Configuration',
+    updateRateLabel: 'Refresh Rate',
+    rateVeryFast: 'Very fast (1 second)',
+    rateNormal: 'Normal (2.5 seconds)',
+    rateSlow: 'Slow (5 seconds)',
+    rateVerySlow: 'Very slow (10 seconds)',
+    orderVisibilityLabel: 'Order & Visibility (Click to configure)',
+    moveUp: 'Move Up',
+    moveDown: 'Move Down',
+    show: 'Show',
+    hide: 'Hide',
+    customizeValue: 'Customize Value: {label}',
+    displayName: 'Display Name',
+    barColor: 'Progress Bar Color',
+    tileColor: 'Use Tile Color',
+    customColor: 'Custom Color',
+    selectIcon: 'Select Icon',
+    searchIcon: 'Search icons... (e.g. Activity)',
+    presets: 'Popular Icons',
+    accentColorLabel: 'Accent Color',
+    delete: 'Delete',
+    deleteConfirmGroup: 'Are you sure you want to delete this {typeText} and all its containing elements?',
+    typeTextGroup: 'Group',
+    typeTextLinks: 'Link Tile',
+    typeTextMonitoring: 'Monitoring Tile',
+    noProjectsInGroup: 'No projects in this group',
+    
+    // Link Modal
+    editLink: 'Edit Link',
+    createLink: 'Add New Link',
+    websiteNameLabel: 'Website Name',
+    websiteNamePlaceholder: 'e.g. Google, Wiki...',
+    urlAddressLabel: 'URL / Address',
+    urlAddressPlaceholder: 'e.g. google.com or https://github.com',
+    noLinksAdded: 'No links added yet',
+    noMatchingLinks: 'No matching links',
+    addLinkBtn: 'Add Link',
+    deleteConfirmLink: 'Are you sure you want to delete this link?',
+    
+    // Project Modal
+    editProject: 'Edit Project',
+    createProject: 'Create New Project',
+    projectNameLabel: 'Project Name',
+    projectNamePlaceholder: 'e.g. AMDGPU WebUI',
+    groupLabel: 'Group',
+    directoryPathLabel: 'Directory Path',
+    directoryPathPlaceholder: 'e.g. C:\\Projects\\amdgpu-webui or /home/...',
+    displayTypeLabel: 'Display Type',
+    standardIcon: 'Standard Icon',
+    customImagePaths: 'Custom Image Paths',
+    iconSearchLabel: 'Search Icon',
+    iconSearchPlaceholder: 'Search icons... (e.g. Terminal)',
+    iconColorLabel: 'Icon Color',
+    standardColor: 'Standard',
+    customPathsTitle: 'Custom Paths Configuration',
+    imageIconPath: 'Image Icon Path (Optional)',
+    bgImagePath: 'Background Image Path (Optional)',
+    descriptionLabel: 'Description (Optional)',
+    descriptionPlaceholder: 'Short description of the project...',
+    ideConfigTitle: 'IDE Configuration',
+    primaryIde: 'Primary IDE',
+    secondaryIde: 'Secondary IDE (Optional)',
+    noPrimaryIde: 'No primary IDE',
+    noSecondaryIde: 'No secondary IDE',
+    startConfigTitle: 'Start Configuration (Main Button)',
+    commandLabel: 'Command',
+    linkLabel: 'Link / URL',
+    commandPlaceholder: 'e.g. npm run start or ./start.sh',
+    linkPlaceholder: 'e.g. https://localhost:3000',
+    noCommandRequired: 'No command required',
+    startTypeLabel: 'Start Type',
+    extraButtonsTitle: 'Additional Buttons (More Actions)',
+    addButton: 'Add Button',
+    noExtraButtons: 'No additional buttons defined.',
+    buttonLabelPlaceholder: 'Label (e.g. Setup)',
+    buttonCommandPlaceholder: 'Command (e.g. npm run build)',
+    buttonLinkPlaceholder: 'e.g. https://localhost:3000',
+    noButtonCommandRequired: 'No command needed',
+    removeButton: 'Remove Button',
+    deleteConfirmProject: 'Are you sure you want to delete the project "{name}"?',
+    
+    // Monitoring items
+    metrics_cpu_usage: 'CPU Usage',
+    metrics_cpu_temp: 'CPU Temperature',
+    metrics_gpu_usage: 'GPU Usage',
+    metrics_gpu_temp: 'GPU Temperature',
+    metrics_ram_usage: 'RAM Usage',
+    metrics_disk_usage: 'Disk Space',
+    metrics_network_traffic: 'Network Traffic',
+    metrics_loading: 'Loading system metrics...',
+    metrics_net_download: 'Download',
+    metrics_net_upload: 'Upload',
+    
+    // Notifications & Messages
+    notif_layout_saved: 'Layout changes saved successfully!',
+    notif_settings_saved: 'Settings saved successfully!',
+    notif_load_failed: 'Failed to load configuration from server. Is the backend running?',
+    notif_save_failed: 'Failed to save configuration: {message}',
+    notif_executing: 'Executing command...',
+    notif_execute_failed: 'Error executing command: {message}',
+    notif_execute_success: 'Command executed successfully!',
+    notif_opening_dir: 'Opening directory...',
+    notif_open_dir_success: 'Directory opened successfully!',
+    notif_open_dir_failed: 'Could not open directory: {message}',
+    notif_opening_ide: 'Opening in IDE...',
+    notif_open_ide_success: 'Opened in IDE successfully!',
+    notif_open_ide_failed: 'Could not start IDE: {message}'
+  },
+  de: {
+    // Top Header
+    searchPlaceholder: 'Suchen nach Projekten, Pfaden...',
+    layoutEditActive: 'Bearbeitungsmodus aktiv: Am Header ziehen zum Verschieben, unten rechts zum Skalieren.',
+    layoutSave: 'Layout speichern',
+    layoutAdjust: 'Layout anpassen',
+    newTile: 'Neue Kachel',
+    globalSettings: 'Globale Einstellungen',
+    noResultsTitle: 'Keine Ergebnisse gefunden',
+    noResultsText: 'Es wurden keine Kacheln, Projekte oder Links gefunden, die zu "{query}" passen.',
+    
+    // Project Card
+    dragToReorder: 'Ziehen zum Neuanordnen',
+    openIn: 'Öffnen in {name}',
+    openFolder: 'Ordner im Dateimanager öffnen',
+    start: 'Start',
+    disabled: 'Deaktiviert',
+    runCommand: 'Ausführen: {command} ({mode})',
+    backendLogsBtn: 'Backend-Logs',
+    
+    // Badge Modes
+    mode_terminal: 'Terminal',
+    mode_terminal_sudo: 'Sudo Terminal',
+    mode_direct: 'Direkt-UI',
+    mode_browser: 'Browser',
+    mode_disabled: 'Deaktiviert',
+
+    // Settings Modal
+    settingsTitle: 'Globale Einstellungen',
+    defaultTerminal: 'Standard-Terminal für Ausführungen',
+    terminalHelp_alacritty: 'Alacritty wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_konsole: 'Konsole wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_cmd: 'Eingabeaufforderung (CMD) wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_powershell: 'PowerShell wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_gnome_terminal: 'GNOME Terminal wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_xfce_terminal: 'XFCE Terminal wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_kitty: 'Kitty wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_terminator: 'Terminator wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_tilix: 'Tilix wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_mate_terminal: 'MATE Terminal wird zum Öffnen interaktiver Terminals verwendet.',
+    terminalHelp_xterm: 'XTerm wird zum Öffnen interaktiver Terminals verwendet.',
+    manageIdes: 'IDE-Konfigurationen verwalten',
+    addIde: 'IDE hinzufügen',
+    noIdes: 'Keine IDE-Konfigurationen definiert.',
+    ideNamePlaceholder: 'IDE Name (z.B. Code)',
+    idePathPlaceholder: 'Pfad / Befehl (z.B. code-oss)',
+    removeIde: 'IDE entfernen',
+    customIconPlaceholder: 'Eigenes Icon Bild (Optionaler absoluter Pfad zu .png / .jpg)',
+    languageLabel: 'System-Sprache',
+    languageHelp: 'Wähle die Sprache der Benutzeroberfläche.',
+    cancel: 'Abbrechen',
+    save: 'Speichern',
+    
+    // Group Modal
+    editTile: 'Kachel bearbeiten',
+    createTile: 'Neue Kachel erstellen',
+    tileNameLabel: 'Kachelname (Überschrift)',
+    tileNamePlaceholder: 'z.B. Web-Projekte, System-Tools, Server-Status...',
+    tileTypeLabel: 'Art der Kachel',
+    tileTypeGroup: 'Projekt-Gruppe (Standard)',
+    tileTypeLinks: 'Lesezeichen & Links',
+    tileTypeMonitoring: 'System-Monitoring (Echtzeit)',
+    monitoringConfigTitle: 'System-Monitoring Konfiguration',
+    updateRateLabel: 'Aktualisierungsrate',
+    rateVeryFast: 'Sehr schnell (1 Sekunde)',
+    rateNormal: 'Normal (2.5 Sekunden)',
+    rateSlow: 'Langsam (5 Sekunden)',
+    rateVerySlow: 'Sehr langsam (10 Sekunden)',
+    orderVisibilityLabel: 'Reihenfolge & Sichtbarkeit (Klick zum Konfigurieren)',
+    moveUp: 'Nach oben',
+    moveDown: 'Nach unten',
+    show: 'Einblenden',
+    hide: 'Ausblenden',
+    customizeValue: 'Wert anpassen: {label}',
+    displayName: 'Anzeige-Name',
+    barColor: 'Balkenfarbe',
+    tileColor: 'Kachelfarbe nutzen',
+    customColor: 'Eigene Farbe',
+    selectIcon: 'Icon auswählen',
+    searchIcon: 'Icons durchsuchen... (z.B. Activity)',
+    presets: 'Beliebte Icons',
+    accentColorLabel: 'Akzentfarbe',
+    delete: 'Löschen',
+    deleteConfirmGroup: 'Möchtest du diese {typeText} und alle ihre enthaltenen Elemente wirklich löschen?',
+    typeTextGroup: 'Gruppe',
+    typeTextLinks: 'Links-Kachel',
+    typeTextMonitoring: 'Monitoring-Kachel',
+    noProjectsInGroup: 'Keine Projekte in dieser Gruppe',
+    
+    // Link Modal
+    editLink: 'Link bearbeiten',
+    createLink: 'Neuen Link hinzufügen',
+    websiteNameLabel: 'Name der Website',
+    websiteNamePlaceholder: 'z.B. Google, CachyOS Wiki...',
+    urlAddressLabel: 'URL / Adresse',
+    urlAddressPlaceholder: 'z.B. google.de oder https://github.com',
+    noLinksAdded: 'Keine Links hinzugefügt',
+    noMatchingLinks: 'Keine passenden Links',
+    addLinkBtn: 'Link hinzufügen',
+    deleteConfirmLink: 'Möchtest du diesen Link wirklich löschen?',
+    
+    // Project Modal
+    editProject: 'Projekt bearbeiten',
+    createProject: 'Neues Projekt erstellen',
+    projectNameLabel: 'Projektname',
+    projectNamePlaceholder: 'z.B. AMDGPU WebUI',
+    groupLabel: 'Gruppe',
+    directoryPathLabel: 'Verzeichnis-Pfad',
+    directoryPathPlaceholder: 'z.B. /home/... oder C:\\Projekte\\...',
+    displayTypeLabel: 'Darstellungs-Typ',
+    standardIcon: 'Standard Icon',
+    customImagePaths: 'Eigene Bild-Pfade',
+    iconSearchLabel: 'Icon durchsuchen',
+    iconSearchPlaceholder: 'Icons durchsuchen... (z.B. Terminal)',
+    iconColorLabel: 'Icon-Farbe',
+    standardColor: 'Standard',
+    customPathsTitle: 'Eigene Pfade Konfiguration',
+    imageIconPath: 'Bild-Icon Pfad (Optional)',
+    bgImagePath: 'Hintergrundbild Pfad (Optional)',
+    descriptionLabel: 'Beschreibung (Optional)',
+    descriptionPlaceholder: 'Kurze Beschreibung des Projekts...',
+    ideConfigTitle: 'IDE-Konfiguration',
+    primaryIde: 'Primäre IDE',
+    secondaryIde: 'Sekundäre IDE (Optional)',
+    noPrimaryIde: 'Keine primäre IDE',
+    noSecondaryIde: 'Keine sekundäre IDE',
+    startConfigTitle: 'Start-Konfiguration (Haupt-Button)',
+    commandLabel: 'Befehl',
+    linkLabel: 'Link / URL',
+    commandPlaceholder: 'z.B. ./start-webui-cachyos.sh oder npm run dev',
+    linkPlaceholder: 'z.B. https://google.com',
+    noCommandRequired: 'Kein Befehl erforderlich',
+    startTypeLabel: 'Start-Typ',
+    extraButtonsTitle: 'Zusätzliche Buttons (Weitere Aktionen)',
+    addButton: 'Button hinzufügen',
+    noExtraButtons: 'Keine zusätzlichen Buttons definiert.',
+    buttonLabelPlaceholder: 'Label (z.B. Setup)',
+    buttonCommandPlaceholder: 'Befehl (z.B. ./setup.sh)',
+    buttonLinkPlaceholder: 'z.B. https://google.com',
+    noButtonCommandRequired: 'Kein Befehl nötig',
+    removeButton: 'Button entfernen',
+    deleteConfirmProject: 'Möchtest du das Projekt "{name}" wirklich löschen?',
+    
+    // Monitoring items
+    metrics_cpu_usage: 'CPU Auslastung',
+    metrics_cpu_temp: 'CPU Temperatur',
+    metrics_gpu_usage: 'GPU Auslastung',
+    metrics_gpu_temp: 'GPU Temperatur',
+    metrics_ram_usage: 'RAM Belegung',
+    metrics_disk_usage: 'Speicherplatz',
+    metrics_network_traffic: 'Netzwerktraffic',
+    metrics_loading: 'Lade Systemwerte...',
+    metrics_net_download: 'Download',
+    metrics_net_upload: 'Upload',
+    
+    // Notifications & Messages
+    notif_layout_saved: 'Layout-Änderungen erfolgreich gespeichert!',
+    notif_settings_saved: 'Änderungen erfolgreich gespeichert!',
+    notif_load_failed: 'Konnte Konfiguration vom Server nicht laden. Läuft das Backend?',
+    notif_save_failed: 'Fehler beim Speichern: {message}',
+    notif_executing: 'Befehl wird ausgeführt...',
+    notif_execute_failed: 'Fehler beim Ausführen: {message}',
+    notif_execute_success: 'Befehl erfolgreich ausgeführt!',
+    notif_opening_dir: 'Öffne Verzeichnis...',
+    notif_open_dir_success: 'Verzeichnis erfolgreich geöffnet!',
+    notif_open_dir_failed: 'Konnte Ordner nicht öffnen: {message}',
+    notif_opening_ide: 'Öffne in IDE...',
+    notif_open_ide_success: 'Erfolgreich in IDE geöffnet!',
+    notif_open_ide_failed: 'Konnte IDE nicht starten: {message}'
+  },
+  es: {
+    // Top Header
+    searchPlaceholder: 'Buscar proyectos, rutas...',
+    layoutEditActive: 'Modo de edición de diseño activo: Arrastre los encabezados para mover, la esquina inferior derecha para redimensionar.',
+    layoutSave: 'Guardar diseño',
+    layoutAdjust: 'Ajustar diseño',
+    newTile: 'Nueva tarjeta',
+    globalSettings: 'Ajustes globales',
+    noResultsTitle: 'No se encontraron resultados',
+    noResultsText: 'No se encontraron tarjetas, proyectos o enlaces que coincidan con "{query}".',
+    
+    // Project Card
+    dragToReorder: 'Arrastrar para reordenar',
+    openIn: 'Abrir en {name}',
+    openFolder: 'Abrir carpeta en el administrador de archivos',
+    start: 'Iniciar',
+    disabled: 'Desactivado',
+    runCommand: 'Ejecutar: {command} ({mode})',
+    backendLogsBtn: 'Logs del backend',
+    
+    // Badge Modes
+    mode_terminal: 'Terminal',
+    mode_terminal_sudo: 'Terminal Sudo',
+    mode_direct: 'UI Directa',
+    mode_browser: 'Navegador',
+    mode_disabled: 'Desactivado',
+
+    // Settings Modal
+    settingsTitle: 'Ajustes Globales',
+    defaultTerminal: 'Terminal Predeterminado para Ejecuciones',
+    terminalHelp_alacritty: 'Alacritty se utiliza para abrir terminales interactivas.',
+    terminalHelp_konsole: 'Konsole se utiliza para abrir terminales interactivas.',
+    terminalHelp_cmd: 'El Símbolo del sistema (CMD) se utiliza para abrir terminales interactivas.',
+    terminalHelp_powershell: 'PowerShell se utiliza para abrir terminales interactivas.',
+    terminalHelp_gnome_terminal: 'GNOME Terminal se utiliza para abrir terminales interactivas.',
+    terminalHelp_xfce_terminal: 'XFCE Terminal se utiliza para abrir terminales interactivas.',
+    terminalHelp_kitty: 'Kitty se utiliza para abrir terminales interactivas.',
+    terminalHelp_terminator: 'Terminator se utiliza para abrir terminales interactivas.',
+    terminalHelp_tilix: 'Tilix se utiliza para abrir terminales interactivas.',
+    terminalHelp_mate_terminal: 'MATE Terminal se utiliza para abrir terminales interactivas.',
+    terminalHelp_xterm: 'XTerm se utiliza para abrir terminales interactivas.',
+    manageIdes: 'Administrar configuraciones de IDE',
+    addIde: 'Añadir IDE',
+    noIdes: 'No se han definido configuraciones de IDE.',
+    ideNamePlaceholder: 'Nombre de la IDE (ej. VS Code)',
+    idePathPlaceholder: 'Ruta / Comando (ej. code)',
+    removeIde: 'Eliminar IDE',
+    customIconPlaceholder: 'Imagen de icono personalizada (Ruta absoluta opcional a .png / .jpg)',
+    languageLabel: 'Idioma del sistema',
+    languageHelp: 'Seleccione el idioma de la interfaz.',
+    cancel: 'Cancelar',
+    save: 'Guardar',
+    
+    // Group Modal
+    editTile: 'Editar tarjeta',
+    createTile: 'Crear nueva tarjeta',
+    tileNameLabel: 'Nombre de la tarjeta (Encabezado)',
+    tileNamePlaceholder: 'ej. Proyectos Web, Herramientas del Sistema, Estado del Servidor...',
+    tileTypeLabel: 'Tipo de tarjeta',
+    tileTypeGroup: 'Grupo de proyectos (Por defecto)',
+    tileTypeLinks: 'Marcadores y Enlaces',
+    tileTypeMonitoring: 'Monitoreo del sistema (Tiempo real)',
+    monitoringConfigTitle: 'Configuración del monitoreo del sistema',
+    updateRateLabel: 'Tasa de refresco',
+    rateVeryFast: 'Muy rápido (1 segundo)',
+    rateNormal: 'Normal (2.5 segundos)',
+    rateSlow: 'Lento (5 segundos)',
+    rateVerySlow: 'Muy lento (10 segundos)',
+    orderVisibilityLabel: 'Orden y Visibilidad (Clic para configurar)',
+    moveUp: 'Subir',
+    moveDown: 'Bajar',
+    show: 'Mostrar',
+    hide: 'Ocultar',
+    customizeValue: 'Personalizar valor: {label}',
+    displayName: 'Nombre a mostrar',
+    barColor: 'Color de la barra',
+    tileColor: 'Usar color de la tarjeta',
+    customColor: 'Color personalizado',
+    selectIcon: 'Seleccionar icono',
+    searchIcon: 'Buscar iconos... (ej. Activity)',
+    presets: 'Iconos populares',
+    accentColorLabel: 'Color de acento',
+    delete: 'Eliminar',
+    deleteConfirmGroup: '¿Está seguro de que desea eliminar este/a {typeText} y todos los elementos que contiene?',
+    typeTextGroup: 'Grupo',
+    typeTextLinks: 'Tarjeta de enlaces',
+    typeTextMonitoring: 'Tarjeta de monitoreo',
+    noProjectsInGroup: 'No hay proyectos en este grupo',
+    
+    // Link Modal
+    editLink: 'Editar enlace',
+    createLink: 'Añadir nuevo enlace',
+    websiteNameLabel: 'Nombre del sitio web',
+    websiteNamePlaceholder: 'ej. Google, Wiki...',
+    urlAddressLabel: 'URL / Dirección',
+    urlAddressPlaceholder: 'ej. google.com o https://github.com',
+    noLinksAdded: 'No se han añadido enlaces',
+    noMatchingLinks: 'No hay enlaces coincidentes',
+    addLinkBtn: 'Añadir enlace',
+    deleteConfirmLink: '¿Está seguro de que desea eliminar este enlace?',
+    
+    // Project Modal
+    editProject: 'Editar proyecto',
+    createProject: 'Crear nuevo proyecto',
+    projectNameLabel: 'Nombre del proyecto',
+    projectNamePlaceholder: 'ej. AMDGPU WebUI',
+    groupLabel: 'Grupo',
+    directoryPathLabel: 'Ruta del directorio',
+    directoryPathPlaceholder: 'ej. /home/... o C:\\Proyectos\\...',
+    displayTypeLabel: 'Tipo de visualización',
+    standardIcon: 'Icono estándar',
+    customImagePaths: 'Rutas de imagen personalizadas',
+    iconSearchLabel: 'Buscar icono',
+    iconSearchPlaceholder: 'Buscar iconos... (ej. Terminal)',
+    iconColorLabel: 'Color del icono',
+    standardColor: 'Estándar',
+    customPathsTitle: 'Configuración de rutas personalizadas',
+    imageIconPath: 'Ruta de la imagen del icono (Opcional)',
+    bgImagePath: 'Ruta de la imagen de fondo (Opcional)',
+    descriptionLabel: 'Descripción (Opcional)',
+    descriptionPlaceholder: 'Breve descripción del proyecto...',
+    ideConfigTitle: 'Configuración de IDE',
+    primaryIde: 'IDE principal',
+    secondaryIde: 'IDE secundaria (Opcional)',
+    noPrimaryIde: 'Sin IDE principal',
+    noSecondaryIde: 'Sin IDE secundaria',
+    startConfigTitle: 'Configuración de inicio (Botón principal)',
+    commandLabel: 'Comando',
+    linkLabel: 'Enlace / URL',
+    commandPlaceholder: 'ej. npm run start o ./start.sh',
+    linkPlaceholder: 'ej. https://localhost:3000',
+    noCommandRequired: 'No se requiere comando',
+    startTypeLabel: 'Tipo de inicio',
+    extraButtonsTitle: 'Botones adicionales (Más acciones)',
+    addButton: 'Añadir botón',
+    noExtraButtons: 'No se han definido botones adicionales.',
+    buttonLabelPlaceholder: 'Etiqueta (ej. Setup)',
+    buttonCommandPlaceholder: 'Comando (ej. npm run build)',
+    buttonLinkPlaceholder: 'ej. https://localhost:3000',
+    noButtonCommandRequired: 'No se necesita comando',
+    removeButton: 'Eliminar botón',
+    deleteConfirmProject: '¿Está seguro de que desea eliminar el proyecto "{name}"?',
+    
+    // Monitoring items
+    metrics_cpu_usage: 'Uso de CPU',
+    metrics_cpu_temp: 'Temperatura de CPU',
+    metrics_gpu_usage: 'Uso de GPU',
+    metrics_gpu_temp: 'Temperatura de GPU',
+    metrics_ram_usage: 'Uso de RAM',
+    metrics_disk_usage: 'Espacio en disco',
+    metrics_network_traffic: 'Tráfico de red',
+    metrics_loading: 'Cargando métricas del sistema...',
+    metrics_net_download: 'Descarga',
+    metrics_net_upload: 'Subida',
+    
+    // Notifications & Messages
+    notif_layout_saved: '¡Cambios de diseño guardados con éxito!',
+    notif_settings_saved: '¡Ajustes guardados con éxito!',
+    notif_load_failed: 'Error al cargar la configuración del servidor. ¿Está funcionando el backend?',
+    notif_save_failed: 'Error al guardar la configuración: {message}',
+    notif_executing: 'Ejecutando comando...',
+    notif_execute_failed: 'Error al ejecutar el comando: {message}',
+    notif_execute_success: '¡Comando ejecutado con éxito!',
+    notif_opening_dir: 'Abriendo directorio...',
+    notif_open_dir_success: '¡Directorio abierto con éxito!',
+    notif_open_dir_failed: 'No se pudo abrir el directorio: {message}',
+    notif_opening_ide: 'Abriendo en el IDE...',
+    notif_open_ide_success: '¡Abierto en el IDE con éxito!',
+    notif_open_ide_failed: 'No se pudo iniciar el IDE: {message}'
+  },
+  fr: {
+    // Top Header
+    searchPlaceholder: 'Rechercher des projets, chemins...',
+    layoutEditActive: 'Mode édition de mise en page actif : Glissez les en-têtes pour déplacer, le coin inférieur droit pour redimensionner.',
+    layoutSave: 'Enregistrer la disposition',
+    layoutAdjust: 'Ajuster la disposition',
+    newTile: 'Nouvelle tuile',
+    globalSettings: 'Paramètres globaux',
+    noResultsTitle: 'Aucun résultat trouvé',
+    noResultsText: 'Aucune tuile, projet ou lien correspondant à "{query}" n\'a été trouvé.',
+    
+    // Project Card
+    dragToReorder: 'Faites glisser pour réorganiser',
+    openIn: 'Ouvrir dans {name}',
+    openFolder: 'Ouvrir le dossier dans le gestionnaire de fichiers',
+    start: 'Démarrer',
+    disabled: 'Désactivé',
+    runCommand: 'Exécuter : {command} ({mode})',
+    backendLogsBtn: 'Logs du backend',
+    
+    // Badge Modes
+    mode_terminal: 'Terminal',
+    mode_terminal_sudo: 'Terminal Sudo',
+    mode_direct: 'UI Directe',
+    mode_browser: 'Navigateur',
+    mode_disabled: 'Désactivé',
+
+    // Settings Modal
+    settingsTitle: 'Paramètres Globaux',
+    defaultTerminal: 'Terminal par Défaut pour les Exécutions',
+    terminalHelp_alacritty: 'Alacritty est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_konsole: 'Konsole est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_cmd: 'L\'invite de commandes (CMD) est utilisée pour ouvrir des terminaux interactifs.',
+    terminalHelp_powershell: 'PowerShell est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_gnome_terminal: 'GNOME Terminal est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_xfce_terminal: 'XFCE Terminal est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_kitty: 'Kitty est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_terminator: 'Terminator est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_tilix: 'Tilix est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_mate_terminal: 'MATE Terminal est utilisé pour ouvrir des terminaux interactifs.',
+    terminalHelp_xterm: 'XTerm est utilisé pour ouvrir des terminaux interactifs.',
+    manageIdes: 'Gérer les configurations d\'IDE',
+    addIde: 'Ajouter un IDE',
+    noIdes: 'Aucune configuration d\'IDE définie.',
+    ideNamePlaceholder: 'Nom de l\'IDE (ex. VS Code)',
+    idePathPlaceholder: 'Chemin / Commande (ex. code)',
+    removeIde: 'Supprimer l\'IDE',
+    customIconPlaceholder: 'Image d\'icône personnalisée (Chemin absolu facultatif vers .png / .jpg)',
+    languageLabel: 'Langue du système',
+    languageHelp: 'Choisissez la langue de l\'interface.',
+    cancel: 'Annuler',
+    save: 'Enregistrer',
+    
+    // Group Modal
+    editTile: 'Modifier la tuile',
+    createTile: 'Créer une nouvelle tuile',
+    tileNameLabel: 'Nom de la tuile (En-tête)',
+    tileNamePlaceholder: 'ex. Projets Web, Outils Système, Statut du Serveur...',
+    tileTypeLabel: 'Type de tuile',
+    tileTypeGroup: 'Groupe de projets (Par défaut)',
+    tileTypeLinks: 'Signets & Liens',
+    tileTypeMonitoring: 'Moniteur système (Temps réel)',
+    monitoringConfigTitle: 'Configuration du moniteur système',
+    updateRateLabel: 'Taux de rafraîchissement',
+    rateVeryFast: 'Très rapide (1 seconde)',
+    rateNormal: 'Normal (2.5 secondes)',
+    rateSlow: 'Lent (5 secondes)',
+    rateVerySlow: 'Très lent (10 secondes)',
+    orderVisibilityLabel: 'Ordre & Visibilité (Clic pour configurer)',
+    moveUp: 'Monter',
+    moveDown: 'Descendre',
+    show: 'Afficher',
+    hide: 'Masquer',
+    customizeValue: 'Personnaliser la valeur : {label}',
+    displayName: 'Nom d\'affichage',
+    barColor: 'Couleur de la barre',
+    tileColor: 'Utiliser la couleur de la tuile',
+    customColor: 'Couleur personnalisée',
+    selectIcon: 'Sélectionner l\'icône',
+    searchIcon: 'Rechercher des icônes... (ex. Activity)',
+    presets: 'Icônes populaires',
+    accentColorLabel: 'Couleur d\'accentuation',
+    delete: 'Supprimer',
+    deleteConfirmGroup: 'Êtes-vous sûr de vouloir supprimer cette {typeText} et tous les éléments qu\'elle contient ?',
+    typeTextGroup: 'Groupe',
+    typeTextLinks: 'Tuile de liens',
+    typeTextMonitoring: 'Tuile de moniteur',
+    noProjectsInGroup: 'Aucun projet dans ce groupe',
+    
+    // Link Modal
+    editLink: 'Modifier le lien',
+    createLink: 'Ajouter un nouveau lien',
+    websiteNameLabel: 'Nom du site web',
+    websiteNamePlaceholder: 'ex. Google, Wiki...',
+    urlAddressLabel: 'URL / Adresse',
+    urlAddressPlaceholder: 'ex. google.com ou https://github.com',
+    noLinksAdded: 'Aucun lien ajouté',
+    noMatchingLinks: 'Aucun lien correspondant',
+    addLinkBtn: 'Ajouter un lien',
+    deleteConfirmLink: 'Êtes-vous sûr de vouloir supprimer ce lien ?',
+    
+    // Project Modal
+    editProject: 'Modifier le projet',
+    createProject: 'Créer un nouveau projet',
+    projectNameLabel: 'Nom du projet',
+    projectNamePlaceholder: 'ex. AMDGPU WebUI',
+    groupLabel: 'Groupe',
+    directoryPathLabel: 'Chemin du répertoire',
+    directoryPathPlaceholder: 'ex. /home/... ou C:\\Projets\\...',
+    displayTypeLabel: 'Type d\'affichage',
+    standardIcon: 'Icône standard',
+    customImagePaths: 'Chemins d\'images personnalisés',
+    iconSearchLabel: 'Rechercher une icône',
+    iconSearchPlaceholder: 'Rechercher des icônes... (ex. Terminal)',
+    iconColorLabel: 'Couleur de l\'icône',
+    standardColor: 'Standard',
+    customPathsTitle: 'Configuration des chemins personnalisés',
+    imageIconPath: 'Chemin de l\'image d\'icône (Optionnel)',
+    bgImagePath: 'Chemin de l\'image de fond (Optionnel)',
+    descriptionLabel: 'Description (Optionnel)',
+    descriptionPlaceholder: 'Brève description du projet...',
+    ideConfigTitle: 'Configuration d\'IDE',
+    primaryIde: 'IDE principale',
+    secondaryIde: 'IDE secondaire (Optionnel)',
+    noPrimaryIde: 'Aucune IDE principale',
+    noSecondaryIde: 'Aucune IDE secondaire',
+    startConfigTitle: 'Configuration de démarrage (Bouton principal)',
+    commandLabel: 'Commande',
+    linkLabel: 'Lien / URL',
+    commandPlaceholder: 'ex. npm run start ou ./start.sh',
+    linkPlaceholder: 'ex. https://localhost:3000',
+    noCommandRequired: 'Aucune commande requise',
+    startTypeLabel: 'Type de démarrage',
+    extraButtonsTitle: 'Boutons supplémentaires (Plus d\'actions)',
+    addButton: 'Ajouter un bouton',
+    noExtraButtons: 'Aucun bouton supplémentaire défini.',
+    buttonLabelPlaceholder: 'Label (ex. Setup)',
+    buttonCommandPlaceholder: 'Commande (ex. npm run build)',
+    buttonLinkPlaceholder: 'ex. https://localhost:3000',
+    noButtonCommandRequired: 'Aucune commande nécessaire',
+    removeButton: 'Supprimer le bouton',
+    deleteConfirmProject: 'Êtes-vous sûr de vouloir supprimer le projet "{name}" ?',
+    
+    // Monitoring items
+    metrics_cpu_usage: 'Utilisation du processeur',
+    metrics_cpu_temp: 'Température du processeur',
+    metrics_gpu_usage: 'Utilisation du GPU',
+    metrics_gpu_temp: 'Température du GPU',
+    metrics_ram_usage: 'Utilisation de la RAM',
+    metrics_disk_usage: 'Espace disque',
+    metrics_network_traffic: 'Trafic réseau',
+    metrics_loading: 'Chargement des métriques système...',
+    metrics_net_download: 'Téléchargement',
+    metrics_net_upload: 'Téléversement',
+    
+    // Notifications & Messages
+    notif_layout_saved: 'Modifications de disposition enregistrées avec succès !',
+    notif_settings_saved: 'Paramètres enregistrés avec succès !',
+    notif_load_failed: 'Échec du chargement de la configuration depuis le serveur. Le backend est-il lancé ?',
+    notif_save_failed: 'Échec de l\'enregistrement de la configuration : {message}',
+    notif_executing: 'Exécution de la commande...',
+    notif_execute_failed: 'Échec de l\'exécution de la commande : {message}',
+    notif_execute_success: 'Commande exécutée avec succès !',
+    notif_opening_dir: 'Ouverture du répertoire...',
+    notif_open_dir_success: 'Répertoire ouvert avec succès !',
+    notif_open_dir_failed: 'Impossible d\'ouvrir le répertoire : {message}',
+    notif_opening_ide: 'Ouverture dans l\'IDE...',
+    notif_open_ide_success: 'Ouvert dans l\'IDE avec succès !',
+    notif_open_ide_failed: 'Impossible de lancer l\'IDE : {message}'
+  }
+};
+
+interface I18nContextProps {
+  language: LanguageCode;
+  setLanguage: (lang: LanguageCode) => void;
+  t: (key: string, variables?: Record<string, string>) => string;
+}
+
+const I18nContext = createContext<I18nContextProps | undefined>(undefined);
+
+export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Try to read language from localStorage or default to English 'en'
+  const [language, setLanguageState] = useState<LanguageCode>(() => {
+    const saved = localStorage.getItem('start-hub-lang');
+    return (saved as LanguageCode) || 'en';
+  });
+
+  const setLanguage = (lang: LanguageCode) => {
+    setLanguageState(lang);
+    localStorage.setItem('start-hub-lang', lang);
+  };
+
+  const t = (key: string, variables?: Record<string, string>): string => {
+    const dict = translations[language] || translations['en'];
+    let text = dict[key];
+    
+    if (text === undefined) {
+      // Fallback to English dictionary
+      text = translations['en'][key];
+    }
+    
+    if (text === undefined) {
+      return key;
+    }
+    
+    if (variables) {
+      Object.entries(variables).forEach(([k, v]) => {
+        text = text.replace(new RegExp(`{${k}}`, 'g'), v);
+      });
+    }
+    
+    return text;
+  };
+
+  return (
+    <I18nContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </I18nContext.Provider>
+  );
+};
+
+export const useTranslation = () => {
+  const context = useContext(I18nContext);
+  if (!context) {
+    throw new Error('useTranslation must be used within an I18nProvider');
+  }
+  return context;
+};
