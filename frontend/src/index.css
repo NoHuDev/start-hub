@@ -833,19 +833,51 @@ h1, h2, h3, h4, h5, h6 {
   transform: none !important;
 }
 
-/* Dialog Modals Glass Design */
+/* Dialog Modals Glass Design & Elegant Transitions */
 dialog {
   margin: auto;
   border: none;
   background: transparent;
   color: var(--text-primary);
   outline: none;
+  
+  /* Modern CSS dialog entrance/exit transitions */
+  opacity: 0;
+  transform: scale(0.95) translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), display 0.3s allow-discrete, overlay 0.3s allow-discrete;
+}
+
+dialog[open] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: scale(0.95) translateY(12px);
+  }
 }
 
 dialog::backdrop {
+  background-color: rgba(4, 5, 8, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background-color 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease, display 0.3s allow-discrete, overlay 0.3s allow-discrete;
+}
+
+dialog[open]::backdrop {
   background-color: rgba(4, 5, 8, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+@starting-style {
+  dialog[open]::backdrop {
+    background-color: rgba(4, 5, 8, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
 }
 
 .modal-content {
@@ -1222,6 +1254,25 @@ dialog::backdrop {
   gap: 10px;
   align-items: center;
   width: 100%;
+}
+.settings-ide-input-name,
+.settings-ide-input-path,
+.settings-ide-input-image {
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.settings-ide-input-name:focus,
+.settings-ide-input-path:focus,
+.settings-ide-input-image:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan-glow);
 }
 
 .settings-ide-input-name {
@@ -1697,6 +1748,43 @@ dialog::backdrop {
 .settings-ide-select:focus {
   border-color: var(--accent-cyan) !important;
   box-shadow: 0 0 10px var(--accent-cyan-glow) !important;
+}
+
+/* Premium Dashboard Profile Switcher Styling */
+.profile-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.profile-card:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.profile-card.active {
+  border-color: var(--accent-cyan) !important;
+  background: rgba(0, 242, 254, 0.05) !important;
+  box-shadow: 0 0 15px var(--accent-cyan-glow);
+}
+
+.profile-card.active:hover {
+  background: rgba(0, 242, 254, 0.08) !important;
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 20px var(--accent-cyan-glow), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Hide actions until hover */
+.profile-card-actions {
+  opacity: 0;
+  transform: translateX(8px);
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.profile-card:hover .profile-card-actions {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 

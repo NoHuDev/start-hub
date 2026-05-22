@@ -10,6 +10,7 @@ import { ProjectModal } from './components/ProjectModal';
 import { SettingsModal } from './components/SettingsModal';
 import { LinkModal } from './components/LinkModal';
 import type { LinkItem } from './components/LinkModal';
+import { ProfileModal } from './components/ProfileModal';
 
 const API_BASE = 'http://localhost:3030/api';
 
@@ -36,6 +37,10 @@ function App() {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [defaultGroupId, setDefaultGroupId] = useState<string | undefined>(undefined);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [activeProfile, setActiveProfileState] = useState<string>(() => {
+    return localStorage.getItem('start-hub-profile') || 'projects';
+  });
 
   // Link Modal states
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
@@ -83,7 +88,7 @@ function App() {
 
   // Load config on mount
   useEffect(() => {
-    fetchConfig();
+    fetchConfig(activeProfile);
   }, []);
 
   // System monitoring polling effect with dynamic refresh rates
@@ -314,9 +319,9 @@ function App() {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const fetchConfig = async () => {
+  const fetchConfig = async (profileName: string = activeProfile) => {
     try {
-      const res = await fetch(`${API_BASE}/config`);
+      const res = await fetch(`${API_BASE}/config?profile=${encodeURIComponent(profileName)}`);
       if (!res.ok) throw new Error('API server returned error');
       const data = await res.json();
       
@@ -372,7 +377,8 @@ function App() {
     newProjects: Project[],
     newTerminal: string,
     newIdes: IDE[],
-    newLang?: LanguageCode
+    newLang?: LanguageCode,
+    profileName: string = activeProfile
   ) => {
     const payload = {
       settings: {
@@ -386,7 +392,7 @@ function App() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/config`, {
+      const res = await fetch(`${API_BASE}/config?profile=${encodeURIComponent(profileName)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -417,7 +423,7 @@ function App() {
       const res = await fetch(`${API_BASE}/launch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectPath, command, mode })
+        body: JSON.stringify({ projectPath, command, mode, profile: activeProfile })
       });
       const data = await res.json();
       if (data.success) {
@@ -428,6 +434,83 @@ function App() {
     } catch (err: any) {
       console.error('Launch execution error:', err);
       showNotification(t('notif_execute_failed', { message: err.message }), 'error');
+    }
+  };
+
+  // Profile Handlers
+  const handleSelectProfile = (profileId: string) => {
+    setActiveProfileState(profileId);
+    localStorage.setItem('start-hub-profile', profileId);
+    fetchConfig(profileId);
+    showNotification(t('notif_profile_switched', { name: profileId }));
+  };
+
+  const handleCreateProfile = async (profileName: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/profiles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: profileName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification(t('notif_profile_created', { name: data.profile.name }));
+        handleSelectProfile(data.profile.id);
+        return true;
+      } else {
+        throw new Error(data.message || 'Creation failed');
+      }
+    } catch (err: any) {
+      console.error('Create profile error:', err);
+      showNotification(err.message, 'error');
+      return false;
+    }
+  };
+
+  const handleRenameProfile = async (oldName: string, newName: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/profiles/rename`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldName, newName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification(t('notif_profile_renamed', { name: newName }));
+        if (activeProfile === oldName) {
+          setActiveProfileState(newName);
+          localStorage.setItem('start-hub-profile', newName);
+        }
+        return true;
+      } else {
+        throw new Error(data.message || 'Rename failed');
+      }
+    } catch (err: any) {
+      console.error('Rename profile error:', err);
+      showNotification(err.message, 'error');
+      return false;
+    }
+  };
+
+  const handleDeleteProfile = async (profileId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`${API_BASE}/profiles/${encodeURIComponent(profileId)}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification(t('notif_profile_deleted', { name: profileId }));
+        if (activeProfile === profileId) {
+          handleSelectProfile('projects');
+        }
+        return true;
+      } else {
+        throw new Error(data.message || 'Deletion failed');
+      }
+    } catch (err: any) {
+      console.error('Delete profile error:', err);
+      showNotification(err.message, 'error');
+      return false;
     }
   };
 
@@ -854,6 +937,14 @@ function App() {
             title={t('globalSettings')}
           >
             <Icons.Settings size={18} />
+          </button>
+
+          <button
+            className="btn-icon-action"
+            onClick={() => setIsProfileModalOpen(true)}
+            title={t('profileSwitchTitle')}
+          >
+            <Icons.CircleUser size={18} />
           </button>
         </div>
       </header>
@@ -1425,6 +1516,17 @@ function App() {
         availableTerminals={availableTerminals}
         onClose={() => setIsSettingsModalOpen(false)}
         onSave={handleSaveSettings}
+      />
+
+      {/* Profile Switcher Modal */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        activeProfile={activeProfile}
+        onClose={() => setIsProfileModalOpen(false)}
+        onSelectProfile={handleSelectProfile}
+        onCreateProfile={handleCreateProfile}
+        onRenameProfile={handleRenameProfile}
+        onDeleteProfile={handleDeleteProfile}
       />
     </div>
   );

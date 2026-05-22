@@ -26,4 +26,5 @@ dist-ssr/
 *.sw?
 
 # User-specific local data (contains local paths, custom scripts, and personal tools)
-backend/data/projects.json
+backend/data/*
+

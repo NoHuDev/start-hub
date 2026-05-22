@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" width="280" height="64">
+  <defs>
+    <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" class="grad-start" />
+      <stop offset="100%" class="grad-end" />
+    </linearGradient>
+    <style>
+      .rocket-part {
+        fill: #00f2fe;
+      }
+      .grad-start {
+        stop-color: #00f2fe;
+      }
+      .grad-end {
+        stop-color: #8a2be2;
+      }
+      .text-logo {
+        font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-weight: 800;
+        font-size: 38px;
+        fill: url(#text-grad);
+        letter-spacing: -0.03em;
+      }
+      @media (prefers-color-scheme: light) {
+        .rocket-part {
+          fill: #008fa0;
+        }
+        .grad-start {
+          stop-color: #008fa0;
+        }
+        .grad-end {
+          stop-color: #6a1bb2;
+        }
+      }
+    </style>
+  </defs>
+  <!-- Rocket group scaled and positioned -->
+  <g transform="translate(12, 8) scale(1.5)">
+    <!-- Rocket body with a cutout circle window (evenodd fill rule) -->
+    <path class="rocket-part" d="M16 2C14.2 6.5 12 10.5 12 15.5H20C20 10.5 17.8 6.5 16 2Z M16 7.2C15 7.2 14.2 8 14.2 9C14.2 10 15 10.8 16 10.8C17 10.8 17.8 10 17.8 9C17.8 8 17 7.2 16 7.2Z" fill-rule="evenodd" />
+    <!-- Sleek triangular fins -->
+    <path class="rocket-part" d="M12 11L9 16C8.8 16.3 9 16.5 9.4 16.5H12V11Z" />
+    <path class="rocket-part" d="M20 11L23 16C23.2 16.3 23 16.5 22.6 16.5H20V11Z" />
+    <!-- Engine nozzle -->
+    <path class="rocket-part" d="M14.5 15.5L13.5 17.5H18.5L17.5 15.5H14.5Z" />
+    <!-- Exhaust Flame -->
+    <path class="rocket-part" d="M14 18.5C14 21.5 15.2 24.5 16 26.5C16.8 24.5 18 21.5 18 18.5H14Z" opacity="0.85" />
+    <!-- Stable Tiled Launchpad at bottom -->
+    <rect class="rocket-part" x="2" y="27" width="4" height="3" rx="0.5" opacity="0.4" />
+    <rect class="rocket-part" x="7" y="27" width="4" height="3" rx="0.5" opacity="0.6" />
+    <rect class="rocket-part" x="3" y="23" width="4" height="3" rx="0.5" opacity="0.3" />
+    <rect class="rocket-part" x="8" y="22" width="3" height="3" rx="0.5" opacity="0.5" />
+    <rect class="rocket-part" x="26" y="27" width="4" height="3" rx="0.5" opacity="0.4" />
+    <rect class="rocket-part" x="21" y="27" width="4" height="3" rx="0.5" opacity="0.6" />
+    <rect class="rocket-part" x="25" y="23" width="4" height="3" rx="0.5" opacity="0.3" />
+    <rect class="rocket-part" x="21" y="22" width="3" height="3" rx="0.5" opacity="0.5" />
+    <!-- Floating / Displaced Tiles due to Lift-Off Thrust -->
+    <rect class="rocket-part" x="11.5" y="20" width="3" height="2.5" rx="0.5" transform="rotate(-15 13 21)" opacity="0.8" />
+    <rect class="rocket-part" x="17.5" y="20.5" width="2.5" height="2.5" rx="0.5" transform="rotate(10 18.75 21.75)" opacity="0.85" />
+    <rect class="rocket-part" x="13.5" y="24.5" width="5" height="3" rx="0.5" transform="rotate(8 16 26)" opacity="0.9" />
+    <!-- Floating Sparks/Small Tiles -->
+    <rect class="rocket-part" x="10.5" y="16.5" width="1.5" height="1.5" rx="0.3" transform="rotate(30 11.25 17.25)" opacity="0.7" />
+    <rect class="rocket-part" x="20" y="17" width="1.5" height="1.5" rx="0.3" transform="rotate(-25 20.75 17.75)" opacity="0.7" />
+    <rect class="rocket-part" x="15.25" y="22.5" width="1.5" height="1.5" rx="0.3" transform="rotate(45 16 23.25)" opacity="0.9" />
+  </g>
+  <!-- Text next to the rocket -->
+  <text x="72" y="44" class="text-logo">Start Hub</text>
+</svg>

@@ -11,7 +11,10 @@ const PORT = 3030;
 app.use(cors());
 app.use(express.json());
 
-const CONFIG_FILE = path.join(__dirname, 'data', 'projects.json');
+function getProfileFilePath(profileName) {
+  const safeName = (profileName || 'projects').replace(/[\/\b\f\n\r\t\v\\\?\*\:\|\"<>]/g, '').trim();
+  return path.join(__dirname, 'data', `${safeName}.json`);
+}
 
 // Helper to check if a command executable exists in the system PATH
 function isExecutableInPath(binName) {
@@ -120,105 +123,57 @@ function getInitialConfig() {
       language: 'en', // English default
       ides: defaultIdes
     },
-    groups: [
-      {
-        id: 'group-default-tools',
-        name: "CachyOS System & Tools",
-        color: "cyan"
-      },
-      {
-        id: 'group-web-apps',
-        name: "Web Apps & AI Projects",
-        color: "violet"
-      }
-    ],
-    projects: [
-      {
-        id: 'proj-amdgpu-webui',
-        name: "AMDGPU WebUI",
-        groupId: "group-web-apps",
-        path: path.join(os.homedir(), "projects/amdgpu-webui"),
-        icon: "Activity",
-        description: "Stable Diffusion WebUI optimized for AMD GPU on CachyOS",
-        startConfig: {
-          command: "./start-webui-cachyos.sh",
-          mode: "terminal-sudo"
-        },
-        customButtons: [
-          {
-            id: 'btn-setup-env',
-            label: "Setup Env",
-            command: "./setup-cachyos-env.sh",
-            mode: "terminal"
-          }
-        ]
-      },
-      {
-        id: 'proj-start-ui',
-        name: "Start UI Dashboard",
-        groupId: "group-default-tools",
-        path: path.resolve(__dirname, '..'),
-        icon: "LayoutDashboard",
-        description: "Central command hub dashboard for all system tools and projects",
-        startConfig: {
-          command: "npm run dev --prefix frontend",
-          mode: "terminal"
-        },
-        customButtons: [
-          {
-            id: 'btn-open-logs',
-            label: "Backend Logs",
-            command: "tail -f backend.log",
-            mode: "terminal"
-          }
-        ]
-      }
-    ]
+    groups: [],
+    projects: []
   };
 }
 
-function loadConfig() {
+function loadConfig(profileName) {
+  const filePath = getProfileFilePath(profileName);
   try {
-    if (!fs.existsSync(CONFIG_FILE)) {
-      const dataDir = path.dirname(CONFIG_FILE);
+    if (!fs.existsSync(filePath)) {
+      const dataDir = path.dirname(filePath);
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
       const initial = getInitialConfig();
-      fs.writeFileSync(CONFIG_FILE, JSON.stringify(initial, null, 2), 'utf-8');
+      fs.writeFileSync(filePath, JSON.stringify(initial, null, 2), 'utf-8');
       return initial;
     }
-    const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
+    const raw = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
-    console.error('Error loading config, returning defaults:', err);
+    console.error(`Error loading config for profile "${profileName}", returning defaults:`, err);
     return getInitialConfig();
   }
 }
 
-function saveConfig(config) {
+function saveConfig(profileName, config) {
+  const filePath = getProfileFilePath(profileName);
   try {
-    const dataDir = path.dirname(CONFIG_FILE);
+    const dataDir = path.dirname(filePath);
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
+    fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf-8');
     return true;
   } catch (err) {
-    console.error('Failed to save config:', err);
+    console.error(`Failed to save config for profile "${profileName}":`, err);
     return false;
   }
 }
 
 // REST Endpoints
 app.get('/api/config', (req, res) => {
-  const config = loadConfig();
+  const profile = req.query.profile || 'projects';
+  const config = loadConfig(profile);
   config.availableTerminals = getAvailableTerminals();
   res.json(config);
 });
 
 app.post('/api/config', (req, res) => {
-  const success = saveConfig(req.body);
+  const profile = req.query.profile || 'projects';
+  const success = saveConfig(profile, req.body);
   if (success) {
     res.json({ success: true, message: 'Configuration saved successfully.' });
   } else {
@@ -226,14 +181,104 @@ app.post('/api/config', (req, res) => {
   }
 });
 
+// Profiles API Endpoints
+app.get('/api/profiles', (req, res) => {
+  const dataDir = path.join(__dirname, 'data');
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const files = fs.readdirSync(dataDir);
+    const profiles = files
+      .filter(file => file.endsWith('.json'))
+      .map(file => {
+        const name = path.basename(file, '.json');
+        return {
+          id: name,
+          name: name
+        };
+      });
+    res.json(profiles);
+  } catch (err) {
+    console.error('Failed to list profiles:', err);
+    res.status(500).json({ error: 'Failed to list profiles' });
+  }
+});
+
+app.post('/api/profiles', (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ success: false, message: 'Profile name is required' });
+  }
+  const safeName = name.replace(/[\/\b\f\n\r\t\v\\\?\*\:\|\"<>]/g, '').trim();
+  if (!safeName) {
+    return res.status(400).json({ success: false, message: 'Invalid profile name' });
+  }
+  const filePath = getProfileFilePath(safeName);
+  if (fs.existsSync(filePath)) {
+    return res.status(400).json({ success: false, message: 'Profile already exists' });
+  }
+  
+  const initial = getInitialConfig();
+  const success = saveConfig(safeName, initial);
+  if (success) {
+    res.json({ success: true, profile: { id: safeName, name: safeName } });
+  } else {
+    res.status(500).json({ success: false, message: 'Failed to create profile' });
+  }
+});
+
+app.post('/api/profiles/rename', (req, res) => {
+  const { oldName, newName } = req.body;
+  if (!oldName || !newName) {
+    return res.status(400).json({ success: false, message: 'Both old and new names are required' });
+  }
+  const safeOld = oldName.replace(/[\/\b\f\n\r\t\v\\\?\*\:\|\"<>]/g, '').trim();
+  const safeNew = newName.replace(/[\/\b\f\n\r\t\v\\\?\*\:\|\"<>]/g, '').trim();
+  if (!safeOld || !safeNew) {
+    return res.status(400).json({ success: false, message: 'Invalid profile names' });
+  }
+  const oldPath = getProfileFilePath(safeOld);
+  const newPath = getProfileFilePath(safeNew);
+  if (!fs.existsSync(oldPath)) {
+    return res.status(404).json({ success: false, message: 'Source profile not found' });
+  }
+  if (fs.existsSync(newPath)) {
+    return res.status(400).json({ success: false, message: 'Target profile name already exists' });
+  }
+  try {
+    fs.renameSync(oldPath, newPath);
+    res.json({ success: true, message: 'Profile renamed successfully' });
+  } catch (err) {
+    console.error('Failed to rename profile:', err);
+    res.status(500).json({ success: false, message: 'Failed to rename profile' });
+  }
+});
+
+app.delete('/api/profiles/:id', (req, res) => {
+  const { id } = req.params;
+  const safeName = id.replace(/[\/\b\f\n\r\t\v\\\?\*\:\|\"<>]/g, '').trim();
+  const filePath = getProfileFilePath(safeName);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ success: false, message: 'Profile not found' });
+  }
+  try {
+    fs.unlinkSync(filePath);
+    res.json({ success: true, message: 'Profile deleted successfully' });
+  } catch (err) {
+    console.error('Failed to delete profile:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete profile' });
+  }
+});
+
 // Launch System Endpoints
 app.post('/api/launch', (req, res) => {
-  const { projectPath, command, mode } = req.body;
+  const { projectPath, command, mode, profile } = req.body;
   if (!projectPath || !command) {
     return res.status(400).json({ success: false, message: 'Missing projectPath or command' });
   }
 
-  const config = loadConfig();
+  const config = loadConfig(profile);
   let preferredTerminal = config.settings?.preferredTerminal || (process.platform === 'win32' ? 'cmd' : 'alacritty');
 
   // Cross-platform check: if chosen terminal is not available, fall back to first available terminal
