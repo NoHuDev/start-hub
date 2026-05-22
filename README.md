@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="docs/images/logo.svg" alt="Start Hub" width="280">
+<p align="left">
+  <img src="docs/images/logo.svg" alt="Start Hub" width="680">
 </p>
-
-# Start Hub
 
 Start Hub is a centralized development dashboard and project launcher designed to manage, launch, and monitor local applications, system utilities, and development workspaces.
 
