@@ -2,7 +2,7 @@
   <img src="docs/images/logo.svg" alt="Start Hub" width="680">
 </p>
 
-Start Hub is a centralized development dashboard and project launcher designed to manage, launch, and monitor local applications, system utilities, and development workspaces.
+Start Hub is a centralized development dashboard and project launcher designed to manage, launch, and monitor local applications, system utilities, and development workspaces. It was developed for Linux but is constantly being optimized and adapted for Windows.
 
 ---
 
@@ -51,7 +51,7 @@ Start Hub is a centralized development dashboard and project launcher designed t
    ./update.sh
    ```
 
-### Windows
+### Windows (work in progress)
 
 1. **Install**:
    ```cmd
