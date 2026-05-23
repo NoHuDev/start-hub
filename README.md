@@ -29,6 +29,15 @@ Start Hub is a centralized development dashboard and project launcher designed t
 
 ---
 
+## Prerequisites
+
+Before installing and running **Start Hub**, ensure you have **Node.js** (version 18+ recommended) and **npm** installed:
+
+* 💻 **Windows**: Download and run the pre-built installer from the official [Node.js Download Page](https://nodejs.org/en/download/).
+* 🐧 **Linux**: Install Node.js using your system's package manager or a manager like `fnm` / `nvm`. Refer to the official [Node.js Package Manager Guide](https://nodejs.org/en/download/package-manager/) for distribution-specific instructions (e.g., `apt`, `dnf`, `pacman`).
+
+---
+
 ## Installation & Launch
 
 ### Linux
