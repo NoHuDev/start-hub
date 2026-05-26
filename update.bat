@@ -21,10 +21,7 @@ echo.
 :: 2. Update npm packages
 echo [2/2] Aktualisiere npm-Pakete...
 echo.
-echo Aktualisiere Root...
-call npm install
 
-echo.
 echo Aktualisiere Backend...
 cd backend
 call npm install

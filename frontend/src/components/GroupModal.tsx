@@ -21,6 +21,7 @@ export interface Group {
   id: string;
   name: string;
   color: string; // Dynamic hex or standard presets
+  bgColor?: string; // Background color for the tile ('none' = transparent)
   type?: 'group' | 'links' | 'monitoring';
   links?: { id: string; name: string; url: string; icon: string; iconColor?: string }[];
   monitoringSettings?: {
@@ -62,6 +63,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
   
   const [name, setName] = useState('');
   const [color, setColor] = useState<string>('cyan');
+  const [bgColor, setBgColor] = useState<string>('none');
   const [type, setType] = useState<'group' | 'links' | 'monitoring'>('group');
   
   // Monitoring configurations state
@@ -78,6 +80,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
       if (group) {
         setName(group.name);
         setColor(group.color);
+        setBgColor(group.bgColor || 'none');
         setType(group.type || 'group');
         
         if (group.monitoringSettings) {
@@ -99,6 +102,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
       } else {
         setName('');
         setColor('cyan');
+        setBgColor('none');
         setType('group');
         setUpdateRateMs(2500);
         setItemsConfig(DEFAULT_MONITORING_ITEMS.map(i => ({ ...i })));
@@ -143,6 +147,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
       id: group?.id,
       name: name.trim(),
       color,
+      bgColor: bgColor !== 'none' ? bgColor : undefined,
       type,
       links: group?.links || [],
       monitoringSettings: type === 'monitoring' ? {
@@ -178,7 +183,7 @@ export const GroupModal: React.FC<GroupModalProps> = ({
 
         <div className="modal-body custom-scrollbar" style={{ maxHeight: '72vh' }}>
           <div className="form-group">
-            <label htmlFor="group-name">{t('tileNameLabel')}</label>
+            <label htmlFor="group-name">{t('tileNameLabel')} <span className="required-mark">*</span></label>
             <input
               id="group-name"
               type="text"
@@ -619,6 +624,79 @@ export const GroupModal: React.FC<GroupModalProps> = ({
                   type="color" 
                   value={(colors as string[]).includes(color) ? '#00f2fe' : color}
                   onChange={(e) => setColor(e.target.value)}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Background Color */}
+          <div className="form-group">
+            <label>{t('bgColorLabel')}</label>
+            <div className="color-picker-grid" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {/* No Color / X option */}
+              <button
+                type="button"
+                onClick={() => setBgColor('none')}
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  background: bgColor === 'none' ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)',
+                  color: 'var(--text-primary)',
+                  border: bgColor === 'none' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Icons.X size={12} />
+                {t('noColor')}
+              </button>
+
+              {colors.map((c) => (
+                <div
+                  key={`bg-${c}`}
+                  className={`color-option ${c} ${bgColor === c ? 'selected' : ''}`}
+                  onClick={() => setBgColor(c)}
+                  title={c}
+                  style={{ opacity: 0.7 }}
+                />
+              ))}
+              
+              {/* Custom BG Color Picker */}
+              <div 
+                className={`color-option custom-color-option ${bgColor !== 'none' && !(colors as string[]).includes(bgColor) ? 'selected' : ''}`}
+                style={{
+                  background: bgColor !== 'none' && !(colors as string[]).includes(bgColor) ? bgColor : 'linear-gradient(45deg, #ff007f, #8a2be2, #00f2fe, #10b981, #f59e0b)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  border: bgColor !== 'none' && !(colors as string[]).includes(bgColor) ? '2px solid #fff' : '2px solid transparent',
+                  boxShadow: bgColor !== 'none' && !(colors as string[]).includes(bgColor) ? `0 0 10px ${bgColor}` : 'none',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: 0.7
+                }}
+                title={t('customColor')}
+              >
+                <input 
+                  type="color" 
+                  value={bgColor !== 'none' && !(colors as string[]).includes(bgColor) ? bgColor : '#1a1a2e'}
+                  onChange={(e) => setBgColor(e.target.value)}
                   style={{
                     position: 'absolute',
                     top: 0,

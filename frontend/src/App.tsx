@@ -27,7 +27,18 @@ function App() {
   const [preferredTerminal, setPreferredTerminal] = useState<string>('alacritty');
   const [availableTerminals, setAvailableTerminals] = useState<{ id: string; name: string }[]>([]);
   const [ides, setIdes] = useState<IDE[]>([]);
+  const [fontTitle, setFontTitle] = useState<string>("'Outfit', sans-serif");
+  const [fontText, setFontText] = useState<string>("'Plus Jakarta Sans', sans-serif");
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Dynamically apply selected fonts
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-display', fontTitle);
+  }, [fontTitle]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-sans', fontText);
+  }, [fontText]);
   
   // Modal states
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
@@ -366,6 +377,12 @@ function App() {
       if (data.settings?.language) {
         setLanguage(data.settings.language);
       }
+      if (data.settings?.fontTitle) {
+        setFontTitle(data.settings.fontTitle);
+      }
+      if (data.settings?.fontText) {
+        setFontText(data.settings.fontText);
+      }
     } catch (err) {
       console.error('Failed to load configuration:', err);
       showNotification(t('notif_load_failed'), 'error');
@@ -378,6 +395,8 @@ function App() {
     newTerminal: string,
     newIdes: IDE[],
     newLang?: LanguageCode,
+    newFontTitle?: string,
+    newFontText?: string,
     profileName: string = activeProfile
   ) => {
     const payload = {
@@ -385,6 +404,8 @@ function App() {
         preferredTerminal: newTerminal,
         ides: newIdes,
         language: newLang || language,
+        fontTitle: newFontTitle !== undefined ? newFontTitle : fontTitle,
+        fontText: newFontText !== undefined ? newFontText : fontText,
         layoutMode: 'grid'
       },
       groups: newGroups,
@@ -405,6 +426,12 @@ function App() {
         setIdes(newIdes);
         if (newLang) {
           setLanguage(newLang);
+        }
+        if (newFontTitle !== undefined) {
+          setFontTitle(newFontTitle);
+        }
+        if (newFontText !== undefined) {
+          setFontText(newFontText);
         }
         showNotification(t('notif_settings_saved'));
       } else {
@@ -693,8 +720,8 @@ function App() {
     saveConfigToServer(groups, newProjects, preferredTerminal, ides);
   };
 
-  const handleSaveSettings = (term: string, updatedIdes: IDE[], newLang: LanguageCode) => {
-    saveConfigToServer(groups, projects, term, updatedIdes, newLang);
+  const handleSaveSettings = (term: string, updatedIdes: IDE[], newLang: LanguageCode, newFontTitle: string, newFontText: string) => {
+    saveConfigToServer(groups, projects, term, updatedIdes, newLang, newFontTitle, newFontText);
   };
 
   // Viewport Click-and-Drag Panning handler
@@ -940,7 +967,7 @@ function App() {
           </button>
 
           <button
-            className="btn-icon-action"
+            className="btn-icon-action profile-switch-global"
             onClick={() => setIsProfileModalOpen(true)}
             title={t('profileSwitchTitle')}
           >
@@ -1004,7 +1031,18 @@ function App() {
                   height: group.layout ? `${group.layout.h}px` : '496px',
                   zIndex: dragState?.tileId === group.id ? 100 : (resizeState?.tileId === group.id ? 100 : 1),
                   transition: dragState?.tileId === group.id || resizeState?.tileId === group.id ? 'none' : 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  ...customColorStyles
+                  ...customColorStyles,
+                  ...(group.bgColor && group.bgColor !== 'none' ? {
+                    background: ['cyan', 'violet', 'emerald', 'amber', 'rose'].includes(group.bgColor)
+                      ? `rgba(${group.bgColor === 'cyan' ? '0,242,254' : group.bgColor === 'violet' ? '138,43,226' : group.bgColor === 'emerald' ? '16,185,129' : group.bgColor === 'amber' ? '245,158,11' : '244,63,94'}, 0.08)`
+                      : (() => {
+                          const hex = group.bgColor.replace('#', '');
+                          const r = parseInt(hex.substring(0, 2), 16);
+                          const g = parseInt(hex.substring(2, 4), 16);
+                          const b = parseInt(hex.substring(4, 6), 16);
+                          return `rgba(${r},${g},${b}, 0.08)`;
+                        })()
+                  } : {})
                 } as React.CSSProperties}
               >
                 <div 
@@ -1514,6 +1552,8 @@ function App() {
         preferredTerminal={preferredTerminal}
         ides={ides}
         availableTerminals={availableTerminals}
+        currentFontTitle={fontTitle}
+        currentFontText={fontText}
         onClose={() => setIsSettingsModalOpen(false)}
         onSave={handleSaveSettings}
       />

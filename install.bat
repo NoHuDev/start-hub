@@ -30,10 +30,7 @@ echo.
 :: 2. Dependency Installation
 echo [2/3] Installiere Abhängigkeiten...
 echo.
-echo Installiere Root-Pakete...
-call npm install
 
-echo.
 echo Installiere Backend-Pakete...
 cd backend
 call npm install

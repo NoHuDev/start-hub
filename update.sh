@@ -22,8 +22,6 @@ echo ""
 
 # 2. Update dependencies
 echo -e "\033[1;34m[2/2]\033[0m Aktualisiere npm-Pakete..."
-echo "Aktualisiere Root..."
-npm install
 
 echo "Aktualisiere Backend..."
 cd backend && npm install && cd ..

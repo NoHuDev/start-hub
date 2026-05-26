@@ -24,6 +24,15 @@ start "StartHub-Frontend" /min npm run dev --prefix frontend
 timeout /t 2 /nobreak >nul
 echo [✓] Frontend läuft auf http://localhost:5173
 echo.
+
+echo Starte System-Tray-Icon...
+start "StartHub-Tray" /min node backend/tray.js "StartHub-Backend" "StartHub-Frontend"
+timeout /t 1 /nobreak >nul
+
+echo Öffne Standardbrowser...
+start "" "http://localhost:5173"
+
+echo.
 echo ---------------------------------------------------------------
 echo  Dashboard erfolgreich gestartet!
 echo  Öffne deinen Browser unter: http://localhost:5173
@@ -35,5 +44,6 @@ pause >nul
 echo Fahre Server herunter...
 taskkill /fi "windowtitle eq StartHub-Backend*" /t /f >nul 2>&1
 taskkill /fi "windowtitle eq StartHub-Frontend*" /t /f >nul 2>&1
+taskkill /fi "windowtitle eq StartHub-Tray*" /t /f >nul 2>&1
 echo [✓] Server erfolgreich beendet.
 exit

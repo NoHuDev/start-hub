@@ -125,7 +125,7 @@ export const LinkModal: React.FC<LinkModalProps> = ({
 
         <div className="modal-body custom-scrollbar" style={{ maxHeight: '72vh' }}>
           <div className="form-group">
-            <label htmlFor="link-name">{t('websiteNameLabel')}</label>
+            <label htmlFor="link-name">{t('websiteNameLabel')} <span className="required-mark">*</span></label>
             <input
               id="link-name"
               type="text"
@@ -138,7 +138,7 @@ export const LinkModal: React.FC<LinkModalProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="link-url">{t('urlAddressLabel')}</label>
+            <label htmlFor="link-url">{t('urlAddressLabel')} <span className="required-mark">*</span></label>
             <input
               id="link-url"
               type="text"

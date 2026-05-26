@@ -27,4 +27,4 @@ dist-ssr/
 
 # User-specific local data (contains local paths, custom scripts, and personal tools)
 backend/data/*
-
+start-hub.code-workspace

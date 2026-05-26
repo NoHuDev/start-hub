@@ -140,9 +140,13 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     setCustomButtons(customButtons.filter((btn) => btn.id !== id));
   };
 
+  const getFileUrl = (filePath: string) => {
+    return `http://localhost:3030/api/file?path=${encodeURIComponent(filePath)}`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !groupId || !path.trim()) return;
+    if (!name.trim() || !groupId) return;
 
     onSave({
       id: project?.id,
@@ -152,7 +156,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       icon: iconSource === 'preset' ? icon : 'Terminal',
       iconColor: iconSource === 'preset' && iconColor !== 'default' ? iconColor : undefined,
       image: iconSource === 'custom' && image.trim() ? image.trim() : undefined,
-      bgImage: iconSource === 'custom' && bgImage.trim() ? bgImage.trim() : undefined,
+      bgImage: bgImage.trim() ? bgImage.trim() : undefined,
       description: description.trim() || undefined,
       startConfig: {
         command: startCommand.trim(),
@@ -180,7 +184,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         <div className="modal-body custom-scrollbar">
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="proj-name">{t('projectNameLabel')}</label>
+              <label htmlFor="proj-name">{t('projectNameLabel')} <span className="required-mark">*</span></label>
               <input
                 id="proj-name"
                 type="text"
@@ -192,7 +196,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
               />
             </div>
             <div className="form-group">
-              <label htmlFor="proj-group">{t('groupLabel')}</label>
+              <label htmlFor="proj-group">{t('groupLabel')} <span className="required-mark">*</span></label>
               <select
                 id="proj-group"
                 value={groupId}
@@ -217,7 +221,6 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
               placeholder={t('directoryPathPlaceholder')}
               value={path}
               onChange={(e) => setPath(e.target.value)}
-              required
             />
           </div>
 
@@ -452,7 +455,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             </div>
           )}
 
-          {/* Custom Path Section */}
+          {/* Custom Icon Path Section */}
           {iconSource === 'custom' && (
             <div 
               style={{
@@ -470,30 +473,95 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 {t('customPathsTitle')}
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="proj-image">{t('imageIconPath')}</label>
-                  <input
-                    id="proj-image"
-                    type="text"
-                    placeholder="z.B. /usr/share/pixmaps/archlinux-logo.png"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="proj-bg-image">{t('bgImagePath')}</label>
-                  <input
-                    id="proj-bg-image"
-                    type="text"
-                    placeholder="z.B. /home/user/Bilder/wallpaper.jpg"
-                    value={bgImage}
-                    onChange={(e) => setBgImage(e.target.value)}
-                  />
-                </div>
+              <div className="form-group">
+                <label htmlFor="proj-image">{t('imageIconPath')}</label>
+                <input
+                  id="proj-image"
+                  type="text"
+                  placeholder="z.B. /usr/share/pixmaps/archlinux-logo.png"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                />
+                {/* Custom Icon Preview */}
+                {image.trim() && (
+                  <div style={{ 
+                    marginTop: '8px', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px',
+                    padding: '8px 12px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '8px'
+                  }}>
+                    <img 
+                      src={getFileUrl(image.trim())} 
+                      alt="Icon Preview" 
+                      style={{ 
+                        width: '40px', 
+                        height: '40px', 
+                        objectFit: 'cover', 
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: 'rgba(0,0,0,0.3)'
+                      }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Icon Preview</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
+
+          {/* Background Image – always visible, independent of icon mode */}
+          <div className="form-group">
+            <label htmlFor="proj-bg-image">{t('bgImagePath')}</label>
+            <input
+              id="proj-bg-image"
+              type="text"
+              placeholder="z.B. /home/user/Bilder/wallpaper.jpg"
+              value={bgImage}
+              onChange={(e) => setBgImage(e.target.value)}
+            />
+            {/* Background Image Preview */}
+            {bgImage.trim() && (
+              <div style={{ 
+                marginTop: '8px', 
+                position: 'relative',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.08)',
+                height: '80px'
+              }}>
+                <img 
+                  src={getFileUrl(bgImage.trim())} 
+                  alt="Background Preview" 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover',
+                    opacity: 0.4,
+                    filter: 'blur(1px)'
+                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
+                />
+                <div style={{
+                  position: 'absolute',
+                  bottom: '6px',
+                  left: '10px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: 'var(--text-secondary)',
+                  background: 'rgba(0,0,0,0.6)',
+                  padding: '2px 8px',
+                  borderRadius: '4px'
+                }}>
+                  Background Preview
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="form-group">
             <label htmlFor="proj-desc">{t('descriptionLabel')}</label>
@@ -546,74 +614,71 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             </div>
           </div>
 
-          {/* Start configuration */}
+          {/* Combined Start Configuration section */}
           <div className="custom-buttons-manager">
             <h4 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '8px' }}>
               {t('startConfigTitle')}
             </h4>
-            <div className="form-row">
-              <div className="form-group" style={{ flex: 2 }}>
-                <label>{startMode === 'browser' ? t('linkLabel') : t('commandLabel')}</label>
-                <input
-                  type="text"
-                  placeholder={
-                    startMode === 'disabled'
-                      ? t('noCommandRequired')
-                      : startMode === 'browser'
-                      ? t('linkPlaceholder')
-                      : t('commandPlaceholder')
-                  }
-                  value={startCommand}
-                  onChange={(e) => setStartCommand(e.target.value)}
-                  required={startMode !== 'disabled'}
-                  disabled={startMode === 'disabled'}
-                />
+
+            {/* Main Button – highlighted section */}
+            <div style={{
+              padding: '12px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '10px',
+              marginBottom: '10px'
+            }}>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                Main Button
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label>{t('startTypeLabel')}</label>
-                <select
-                  value={startMode}
-                  onChange={(e) => {
-                    const newMode = e.target.value as any;
-                    setStartMode(newMode);
-                    if (newMode === 'disabled') {
-                      setStartCommand('');
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 2 }}>
+                  <label>{startMode === 'browser' ? t('linkLabel') : t('commandLabel')} {startMode !== 'disabled' && <span className="required-mark">*</span>}</label>
+                  <input
+                    type="text"
+                    placeholder={
+                      startMode === 'disabled'
+                        ? t('noCommandRequired')
+                        : startMode === 'browser'
+                        ? t('linkPlaceholder')
+                        : t('commandPlaceholder')
                     }
-                  }}
-                  className="settings-ide-select"
-                >
-                  <option value="terminal">{t('mode_terminal')}</option>
-                  <option value="terminal-sudo">{t('mode_terminal_sudo')}</option>
-                  <option value="direct">{t('mode_direct')}</option>
-                  <option value="browser">{t('mode_browser')}</option>
-                  <option value="disabled">{t('mode_disabled')}</option>
-                </select>
+                    value={startCommand}
+                    onChange={(e) => setStartCommand(e.target.value)}
+                    required={startMode !== 'disabled'}
+                    disabled={startMode === 'disabled'}
+                  />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>{t('startTypeLabel')} <span className="required-mark">*</span></label>
+                  <select
+                    value={startMode}
+                    onChange={(e) => {
+                      const newMode = e.target.value as any;
+                      setStartMode(newMode);
+                      if (newMode === 'disabled') {
+                        setStartCommand('');
+                      }
+                    }}
+                    className="settings-ide-select"
+                  >
+                    <option value="terminal">{t('mode_terminal')}</option>
+                    <option value="terminal-sudo">{t('mode_terminal_sudo')}</option>
+                    <option value="direct">{t('mode_direct')}</option>
+                    <option value="browser">{t('mode_browser')}</option>
+                    <option value="disabled">{t('mode_disabled')}</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Extra Buttons configuration */}
-          <div className="custom-buttons-manager">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <h4 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                {t('extraButtonsTitle')}
-              </h4>
-              <button
-                type="button"
-                className="btn-secondary"
-                style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px' }}
-                onClick={handleAddCustomButton}
-              >
-                <Icons.Plus size={12} /> {t('addButton')}
-              </button>
-            </div>
-
+            {/* Additional Buttons */}
             {customButtons.length === 0 ? (
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '8px 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '4px 0' }}>
                 {t('noExtraButtons')}
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
                 {customButtons.map((btn) => (
                   <div key={btn.id} className="custom-button-item">
                     <input
@@ -668,6 +733,15 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 ))}
               </div>
             )}
+
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '8px', width: '100%', justifyContent: 'center', gap: '6px' }}
+              onClick={handleAddCustomButton}
+            >
+              <Icons.Plus size={12} /> {t('addButton')}
+            </button>
           </div>
         </div>
 
@@ -691,7 +765,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           <button type="button" className="btn-secondary" onClick={onClose}>
             {t('cancel')}
           </button>
-          <button type="submit" className="btn-primary" disabled={!name.trim() || !path.trim() || (startMode !== 'disabled' && !startCommand.trim())}>
+          <button type="submit" className="btn-primary" disabled={!name.trim() || (startMode !== 'disabled' && !startCommand.trim())}>
             {t('save')}
           </button>
         </div>

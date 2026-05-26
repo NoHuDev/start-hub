@@ -31,9 +31,6 @@ echo ""
 # 2. Dependency Installation
 echo -e "\033[1;34m[2/3]\033[0m Installiere Abhängigkeiten..."
 
-echo "Installiere Root-Pakete..."
-npm install
-
 echo "Installiere Backend-Pakete..."
 cd backend && npm install && cd ..
 
